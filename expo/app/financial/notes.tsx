@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Text, ScrollView, Alert } from 'react-native';
+import { View, StyleSheet, TextInput, Text, ScrollView, Alert } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Eye, EyeOff, Lock, CreditCard, PiggyBank } from 'lucide-react-native';

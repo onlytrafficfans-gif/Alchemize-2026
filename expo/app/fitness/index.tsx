@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text, ImageBackground, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, ImageBackground, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Play, TrendingUp, Award, ChevronRight, Plus, Dumbbell } from 'lucide-react-native';

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView, Alert, Platform } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Alert, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Play, Pause, Square, ChevronLeft, Flame, Clock, RotateCcw } from 'lucide-react-native';

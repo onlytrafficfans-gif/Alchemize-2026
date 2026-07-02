@@ -1,14 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  Animated,
-  Easing,
-  TouchableOpacity,
-  Dimensions,
-  Platform,
-} from 'react-native';
+import { View, Text, StyleSheet, Animated, Easing, Dimensions, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown, X } from 'lucide-react-native';
 

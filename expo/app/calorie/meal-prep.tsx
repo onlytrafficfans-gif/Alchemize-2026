@@ -1,15 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Text,
-  TextInput,
-  Modal,
-  Platform,
-  Alert,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TextInput, Modal, Platform, Alert } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';

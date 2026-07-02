@@ -1,16 +1,7 @@
 import { invalidateFoodLogs } from '../../services/queryInvalidationService';
 import React, { useState, useCallback } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  TextInput, 
-  TouchableOpacity, 
-  Text, 
-  ScrollView, 
-  Alert,
-  Platform,
-  KeyboardAvoidingView,
-} from 'react-native';
+import { View, StyleSheet, TextInput, Text, ScrollView, Alert, Platform, KeyboardAvoidingView } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

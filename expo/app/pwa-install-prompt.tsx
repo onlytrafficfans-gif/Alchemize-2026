@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Download, X } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 

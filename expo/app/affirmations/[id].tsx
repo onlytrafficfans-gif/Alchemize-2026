@@ -1,6 +1,7 @@
 import { invalidateAffirmations } from '../../services/queryInvalidationService';
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TextInput, TouchableOpacity, Text, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, TextInput, Text, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { affirmationsDb } from '@/lib/db/affirmations';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, Pressable, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, Pressable, ScrollView } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Calendar as CalendarIcon, ChevronRight, X } from 'lucide-react-native';
 import type { CalendarEvent } from './UnifiedCalendar';
 

@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Plus } from 'lucide-react-native';
 
 interface EmptyStateProps {

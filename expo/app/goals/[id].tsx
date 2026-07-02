@@ -1,12 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, Text, TextInput } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, CheckCircle2, Circle, Target, Calendar as CalendarIcon, Edit3, ChevronUp, ChevronDown } from 'lucide-react-native';

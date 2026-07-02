@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { AlertTriangle, RefreshCw } from 'lucide-react-native';
 
 interface ErrorStateProps {

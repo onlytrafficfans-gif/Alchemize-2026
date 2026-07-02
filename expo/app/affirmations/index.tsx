@@ -1,6 +1,7 @@
 import { invalidateAffirmations } from '../../services/queryInvalidationService';
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, ScrollView, ImageBackground } from 'react-native';
+import { View, StyleSheet, FlatList, Text, ScrollView, ImageBackground } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, Heart, Play, Edit } from 'lucide-react-native';

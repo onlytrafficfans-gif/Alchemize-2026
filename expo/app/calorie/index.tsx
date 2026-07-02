@@ -1,15 +1,6 @@
 import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
-import { 
-  View, 
-  StyleSheet, 
-  ScrollView, 
-  TouchableOpacity, 
-  Text, 
-  Animated,
-  Dimensions,
-  Platform,
-  ImageBackground,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Animated, Dimensions, Platform, ImageBackground } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

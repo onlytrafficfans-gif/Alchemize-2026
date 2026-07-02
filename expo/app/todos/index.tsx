@@ -1,6 +1,7 @@
 import { invalidateTasks } from '../../services/queryInvalidationService';
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, TextInput, Switch, Platform, Alert, KeyboardAvoidingView, Modal, ScrollView } from 'react-native';
+import { View, StyleSheet, FlatList, Text, TextInput, Switch, Platform, Alert, KeyboardAvoidingView, Modal, ScrollView } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, CheckCircle2, Circle, Calendar, Bell, ChevronRight, AlertCircle, X, FileText, Flame, Zap } from 'lucide-react-native';

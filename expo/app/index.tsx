@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { DeviceMotion, DeviceMotionMeasurement } from 'expo-sensors';
-import { View, StyleSheet, Dimensions, ScrollView, TouchableOpacity, Text, Animated, Platform } from 'react-native';
+import { View, StyleSheet, Dimensions, ScrollView, Text, Animated, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Image } from 'expo-image';
 import { useRouter, useFocusEffect } from 'expo-router';

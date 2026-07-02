@@ -1,6 +1,7 @@
 import { invalidateGoals } from '../../services/queryInvalidationService';
 import React, { useState } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Text, ImageBackground, Alert } from 'react-native';
+import { View, StyleSheet, FlatList, Text, ImageBackground, Alert } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, CheckCircle2, Circle, Target, TrendingUp } from 'lucide-react-native';

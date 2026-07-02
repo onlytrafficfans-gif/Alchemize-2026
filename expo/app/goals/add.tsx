@@ -1,16 +1,7 @@
 import { invalidateGoals } from '../../services/queryInvalidationService';
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, TextInput, Text, ScrollView, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { goalsDb } from '@/lib/db/goals';

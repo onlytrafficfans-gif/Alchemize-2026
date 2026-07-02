@@ -1,6 +1,7 @@
 import { invalidateGoals, invalidateTasks } from '../services/queryInvalidationService';
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, TextInput, Alert, ActivityIndicator } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { hapticSelection, hapticSuccess } from '@/lib/haptics';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

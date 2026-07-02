@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, Text, Dimensions, TouchableOpacity, TextInput, Alert, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Dimensions, TextInput, Alert, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';

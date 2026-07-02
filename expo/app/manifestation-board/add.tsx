@@ -1,16 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  Text,
-  ScrollView,
-  Alert,
-  Platform,
-  Modal,
-  KeyboardAvoidingView,
-} from 'react-native';
+import { View, StyleSheet, TextInput, Text, ScrollView, Alert, Platform, Modal, KeyboardAvoidingView } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { CameraView, useCameraPermissions } from 'expo-camera';

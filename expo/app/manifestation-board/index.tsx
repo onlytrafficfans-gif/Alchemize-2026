@@ -1,16 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Text,
-  Dimensions,
-  Alert,
-  Animated,
-  Switch,
-  ImageBackground,
-} from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Dimensions, Alert, Animated, Switch, ImageBackground } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Image } from 'expo-image';
 import { useRouter, Stack } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';

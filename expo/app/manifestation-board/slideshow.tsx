@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, Dimensions, Animated } from 'react-native';
+import { View, StyleSheet, Text, Dimensions, Animated } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';

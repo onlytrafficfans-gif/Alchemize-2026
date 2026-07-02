@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Text, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Text, Platform } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { Play, ChevronLeft, Clock, Flame, Dumbbell } from 'lucide-react-native';

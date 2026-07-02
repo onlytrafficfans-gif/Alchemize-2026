@@ -1,18 +1,7 @@
 import { invalidateFoodLogs } from '../../services/queryInvalidationService';
 import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Text,
-  Platform,
-  ActivityIndicator,
-  ScrollView,
-  TextInput,
-  Alert,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { View, StyleSheet, Text, Platform, ActivityIndicator, ScrollView, TextInput, Alert, Animated, Dimensions } from 'react-native';
+import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useMutation, useQueryClient } from '@tanstack/react-query';

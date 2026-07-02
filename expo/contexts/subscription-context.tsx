@@ -3,48 +3,80 @@ import {
   initPurchases,
   checkProEntitlement,
   isPurchasesSupported,
-  getMonthlyPackage,
+  getAllPackages,
   purchasePackage,
   restorePurchases,
+  getCustomerInfo,
+  logIn,
+  logOut,
+  syncPurchases,
   type PaywallPackage,
 } from '@/lib/purchases';
+import { useAuth } from '@/contexts/auth-context';
 
 interface SubscriptionContextValue {
   isLoading: boolean;
   isPro: boolean;
   monthlyPackage: PaywallPackage | null;
-  purchase: () => Promise<boolean>;
+  yearlyPackage: PaywallPackage | null;
+  lifetimePackage: PaywallPackage | null;
+  allPackages: PaywallPackage[];
+  customerInfo: Record<string, unknown> | null;
+  purchase: (pkg: PaywallPackage) => Promise<boolean>;
   restore: () => Promise<boolean>;
   refresh: () => Promise<void>;
+  logIn: (userId: string) => Promise<void>;
+  logOut: () => Promise<void>;
 }
 
 const SubscriptionContext = createContext<SubscriptionContextValue | null>(null);
 
 export function SubscriptionProvider({ children }: { children: React.ReactNode }) {
+  const { currentUserId } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [isPro, setIsPro] = useState(false);
   const [monthlyPackage, setMonthlyPackage] = useState<PaywallPackage | null>(null);
+  const [yearlyPackage, setYearlyPackage] = useState<PaywallPackage | null>(null);
+  const [lifetimePackage, setLifetimePackage] = useState<PaywallPackage | null>(null);
+  const [allPackages, setAllPackages] = useState<PaywallPackage[]>([]);
+  const [customerInfo, setCustomerInfo] = useState<Record<string, unknown> | null>(null);
+
+  const loadSubscriptionData = useCallback(async () => {
+    if (!isPurchasesSupported()) {
+      setIsPro(true);
+      return;
+    }
+    try {
+      const [pro, packages, info] = await Promise.all([
+        checkProEntitlement(),
+        getAllPackages(),
+        getCustomerInfo(),
+      ]);
+      setIsPro(pro);
+      setMonthlyPackage(packages.monthly);
+      setYearlyPackage(packages.yearly);
+      setLifetimePackage(packages.lifetime);
+      setAllPackages(packages.all);
+      setCustomerInfo(info);
+    } catch (error) {
+      console.error('[Subscription] Failed to load subscription data:', error);
+    }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       try {
         if (!isPurchasesSupported()) {
-          // Web / unsupported platforms: don't block the app behind a paywall.
           if (mounted) setIsPro(true);
           return;
         }
-        const initialized = await initPurchases();
+        const initialized = await initPurchases(currentUserId);
         if (!initialized) {
-          // Missing API key (e.g. local dev) — fail open so the app stays usable.
           if (mounted) setIsPro(true);
           return;
         }
-        const [pro, pkg] = await Promise.all([checkProEntitlement(), getMonthlyPackage()]);
-        if (mounted) {
-          setIsPro(pro);
-          setMonthlyPackage(pkg);
-        }
+        await loadSubscriptionData();
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -52,29 +84,71 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [currentUserId, loadSubscriptionData]);
 
   const refresh = useCallback(async () => {
-    if (!isPurchasesSupported()) return;
-    setIsPro(await checkProEntitlement());
-  }, []);
+    await loadSubscriptionData();
+  }, [loadSubscriptionData]);
 
-  const purchase = useCallback(async () => {
-    if (!monthlyPackage) return false;
-    const ok = await purchasePackage(monthlyPackage);
-    if (ok) setIsPro(true);
+  const purchase = useCallback(async (pkg: PaywallPackage): Promise<boolean> => {
+    const ok = await purchasePackage(pkg);
+    if (ok) {
+      setIsPro(true);
+      await refresh();
+    }
     return ok;
-  }, [monthlyPackage]);
+  }, [refresh]);
 
-  const restore = useCallback(async () => {
+  const restore = useCallback(async (): Promise<boolean> => {
     const ok = await restorePurchases();
-    if (ok) setIsPro(true);
+    if (ok) {
+      setIsPro(true);
+      await refresh();
+    }
     return ok;
+  }, [refresh]);
+
+  const handleLogIn = useCallback(async (userId: string) => {
+    await logIn(userId);
+    await syncPurchases();
+    await refresh();
+  }, [refresh]);
+
+  const handleLogOut = useCallback(async () => {
+    await logOut();
+    setIsPro(false);
+    setCustomerInfo(null);
   }, []);
 
   const value = useMemo(
-    () => ({ isLoading, isPro, monthlyPackage, purchase, restore, refresh }),
-    [isLoading, isPro, monthlyPackage, purchase, restore, refresh],
+    () => ({
+      isLoading,
+      isPro,
+      monthlyPackage,
+      yearlyPackage,
+      lifetimePackage,
+      allPackages,
+      customerInfo,
+      purchase,
+      restore,
+      refresh,
+      logIn: handleLogIn,
+      logOut: handleLogOut,
+    }),
+    [
+      isLoading,
+      isPro,
+      monthlyPackage,
+      yearlyPackage,
+      lifetimePackage,
+      allPackages,
+      customerInfo,
+      purchase,
+      restore,
+      refresh,
+      handleLogIn,
+      handleLogOut,
+    ],
   );
 
   return <SubscriptionContext.Provider value={value}>{children}</SubscriptionContext.Provider>;

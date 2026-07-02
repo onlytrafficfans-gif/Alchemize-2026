@@ -56,7 +56,7 @@ export function isHealthKitSupported(): { supported: boolean; reason: string } {
   if (Platform.OS === 'android') {
     return {
       supported: false,
-      reason: 'HealthKit is iOS only. Android Health Connect support coming soon.',
+      reason: 'Apple Health is only available on iOS devices.',
     };
   }
   

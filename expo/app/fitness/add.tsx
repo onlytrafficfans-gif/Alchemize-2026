@@ -94,9 +94,9 @@ export default function AddWorkoutScreen() {
         await normalizedMetricsDb.upsert({
           id: existingMetric.id,
           date: dateStr,
-          activeMinutes: durationNum,
-          caloriesActive: calories,
-          steps: 0,
+          activeMinutes: (existingMetric.activeMinutes || 0) + durationNum,
+          caloriesActive: (existingMetric.caloriesActive || 0) + calories,
+          steps: existingMetric.steps || 0,
           source: 'workout',
           deviceType: 'none',
         });

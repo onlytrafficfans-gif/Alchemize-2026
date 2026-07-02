@@ -6,6 +6,7 @@ import { Play, Pause, Square, ChevronLeft, Flame, Clock, RotateCcw } from 'lucid
 import * as Haptics from 'expo-haptics';
 import { workoutTemplatesDb, workoutSessionsDb, normalizedMetricsDb } from '@/lib/db/fitness';
 import { estimateCalories } from '@/lib/fitness';
+import { playCompletionChime } from '@/lib/sound';
 import type { WorkoutSession } from '@/types';
 
 export default function WorkoutScreen() {
@@ -92,9 +93,9 @@ export default function WorkoutScreen() {
         await normalizedMetricsDb.upsert({
           id: existingMetric.id,
           date: dateStr,
-          activeMinutes: durationMinutes,
-          caloriesActive: calories,
-          steps: 0,
+          activeMinutes: (existingMetric.activeMinutes || 0) + durationMinutes,
+          caloriesActive: (existingMetric.caloriesActive || 0) + calories,
+          steps: existingMetric.steps || 0,
           source: 'workout',
           deviceType: 'none',
         });
@@ -118,6 +119,7 @@ export default function WorkoutScreen() {
       queryClient.invalidateQueries({ queryKey: ['fitnessAwards'] });
       setCompleted(true);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      void playCompletionChime();
     },
     onError: (error) => {
       console.error('Workout save error:', error);

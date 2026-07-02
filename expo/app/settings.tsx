@@ -819,7 +819,7 @@ export default function SettingsScreen() {
               <Text style={styles.settingSubtitle}>
                 {healthKitPermissions?.overallStatus === 'authorized'
                   ? `Connected • Last sync: ${formatLastSync(healthKitLastSync)}`
-                  : 'Sync workouts from Apple Watch & Ring'}
+                  : 'Sync workouts from Apple Health'}
               </Text>
             </View>
           </View>
@@ -1550,7 +1550,7 @@ export default function SettingsScreen() {
                       </View>
                       <View style={styles.healthKitFeatureText}>
                         <Text style={styles.healthKitFeatureTitle}>Exercise Minutes</Text>
-                        <Text style={styles.healthKitFeatureDesc}>See your daily exercise ring progress</Text>
+                        <Text style={styles.healthKitFeatureDesc}>See your daily exercise progress</Text>
                       </View>
                     </View>
                   </View>
@@ -1561,7 +1561,7 @@ export default function SettingsScreen() {
                       <Text style={styles.healthKitWarningText}>
                         {Platform.OS === 'web'
                           ? 'Apple Health is only available on iOS devices. Use the mobile app to sync wearable data.'
-                          : 'Apple Health is only available on iOS. Android Health Connect support coming soon.'}
+                          : 'Apple Health is only available on iOS devices.'}
                       </Text>
                     </View>
                   )}

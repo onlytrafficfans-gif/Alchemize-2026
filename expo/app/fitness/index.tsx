@@ -14,6 +14,7 @@ import {
   getWeekDays,
   markActiveDay,
 } from '@/lib/fitness';
+import { usePedometer } from '@/hooks/use-pedometer';
 import type { WorkoutTemplate } from '@/types';
 
 function WorkoutCard({ workout, onPress }: { workout: WorkoutTemplate; onPress: () => void }) {
@@ -83,7 +84,10 @@ export default function FitnessHubScreen() {
     },
   });
 
+  const { steps: pedometerSteps } = usePedometer();
+
   const todayProgress = useMemo(() => getTodayProgress(sessions, todayMetric || null), [sessions, todayMetric]);
+  const displaySteps = Math.max(todayProgress.steps, pedometerSteps);
   const weekSummary = useMemo(() => getWeekSummary(sessions), [sessions]);
   const recommended = useMemo(() => recommendWorkouts(templates, sessions, activePlan || null), [templates, sessions, activePlan]);
   const weekDays = useMemo(() => markActiveDay(getWeekDays(), sessions), [sessions]);
@@ -149,7 +153,7 @@ export default function FitnessHubScreen() {
             <View style={styles.progressContainer}>
               {renderProgressRing(todayProgress.activeMinutes, activeMinutesGoal, '#10b981', 'Minutes')}
               {renderProgressRing(todayProgress.calories, caloriesGoal, '#f59e0b', 'Calories')}
-              {renderProgressRing(todayProgress.steps, stepsGoal, '#3b82f6', 'Steps')}
+              {renderProgressRing(displaySteps, stepsGoal, '#3b82f6', 'Steps')}
             </View>
           </View>
 

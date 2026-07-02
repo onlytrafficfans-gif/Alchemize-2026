@@ -6,8 +6,10 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
 
 import { setCurrentUserId } from '@/lib/db/core';
+import { secureStorage } from '@/lib/secure-storage';
 
 const AUTH_STORAGE_KEY = '@alchemize_auth';
+const AUTH_SECURE_KEY = 'alchemize_auth_session';
 const REMEMBER_ME_KEY = '@alchemize_remember_me';
 const USERS_STORAGE_KEY = '@alchemize_users';
 
@@ -44,10 +46,20 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
   const loadAuthState = async () => {
     try {
       console.log('[Auth] Loading auth state...');
-      const [storedAuth, storedRememberMe] = await Promise.all([
-        AsyncStorage.getItem(AUTH_STORAGE_KEY).catch(() => null),
+      let [storedAuth, storedRememberMe] = await Promise.all([
+        secureStorage.getItem(AUTH_SECURE_KEY),
         AsyncStorage.getItem(REMEMBER_ME_KEY).catch(() => null),
       ]);
+
+      if (!storedAuth) {
+        const legacyAuth = await AsyncStorage.getItem(AUTH_STORAGE_KEY).catch(() => null);
+        if (legacyAuth) {
+          console.log('[Auth] Migrating legacy auth to secure storage');
+          storedAuth = legacyAuth;
+          await secureStorage.setItem(AUTH_SECURE_KEY, legacyAuth);
+          await AsyncStorage.removeItem(AUTH_STORAGE_KEY).catch(() => {});
+        }
+      }
 
       if (storedAuth && typeof storedAuth === 'string' && storedAuth.trim().startsWith('{')) {
         try {
@@ -59,16 +71,17 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
             console.log('[Auth] Current user ID restored:', auth.user.id);
           } else {
             console.warn('[Auth] Invalid auth structure, clearing');
-            await AsyncStorage.removeItem(AUTH_STORAGE_KEY).catch(() => {});
+            await secureStorage.removeItem(AUTH_SECURE_KEY);
           }
         } catch (parseError) {
           console.warn('[Auth] Invalid auth JSON, clearing:', parseError);
-          await AsyncStorage.removeItem(AUTH_STORAGE_KEY).catch(() => {});
+          await secureStorage.removeItem(AUTH_SECURE_KEY);
           await AsyncStorage.removeItem(USERS_STORAGE_KEY).catch(() => {});
         }
       } else if (storedAuth) {
         console.warn('[Auth] Corrupted auth data detected, clearing all');
-        await AsyncStorage.multiRemove([AUTH_STORAGE_KEY, USERS_STORAGE_KEY, REMEMBER_ME_KEY]).catch(() => {});
+        await secureStorage.removeItem(AUTH_SECURE_KEY);
+        await AsyncStorage.multiRemove([USERS_STORAGE_KEY, REMEMBER_ME_KEY]).catch(() => {});
       } else {
         console.log('[Auth] No stored auth found');
       }
@@ -123,7 +136,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setCurrentUserId(user.id);
       console.log('[Auth] Current user ID set after login:', user.id);
 
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newAuthState));
+      await secureStorage.setItem(AUTH_SECURE_KEY, JSON.stringify(newAuthState));
       await AsyncStorage.setItem(REMEMBER_ME_KEY, remember.toString());
 
       console.log('[Auth] Login successful');
@@ -180,7 +193,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setCurrentUserId(userId);
       console.log('[Auth] Current user ID set after signup:', userId);
 
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newAuthState));
+      await secureStorage.setItem(AUTH_SECURE_KEY, JSON.stringify(newAuthState));
 
       console.log('[Auth] Signup successful');
       return { success: true };
@@ -267,7 +280,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setCurrentUserId(existingUser.id);
       console.log('[Auth] Apple Sign In successful:', existingUser.email);
 
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newAuthState));
+      await secureStorage.setItem(AUTH_SECURE_KEY, JSON.stringify(newAuthState));
 
       return { success: true };
     } catch (error: any) {
@@ -320,7 +333,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
 
       setAuthState(newAuthState);
       setCurrentUserId(userId);
-      await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(newAuthState));
+      await secureStorage.setItem(AUTH_SECURE_KEY, JSON.stringify(newAuthState));
 
       console.log('[Auth] Google Sign In successful');
       return { success: true };
@@ -362,7 +375,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
       setCurrentUserId(null);
       console.log('[Auth] Current user ID cleared');
       
-      await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+      await secureStorage.removeItem(AUTH_SECURE_KEY);
+      await AsyncStorage.removeItem(AUTH_STORAGE_KEY).catch(() => {});
       await AsyncStorage.removeItem(REMEMBER_ME_KEY);
 
       console.log('[Auth] Logout successful');

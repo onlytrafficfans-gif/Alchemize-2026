@@ -2,15 +2,10 @@ import { Platform } from 'react-native';
 
 export const ENTITLEMENT_ID = 'pro';
 
-const API_KEY_IOS = process.env.EXPO_PUBLIC_REVENUECAT_IOS_KEY ?? '';
-const API_KEY_ANDROID = process.env.EXPO_PUBLIC_REVENUECAT_ANDROID_KEY ?? '';
+const API_KEY = 'test_fWTiPXsQgZVLfKlkuqfYnBRtuLG';
 
 export function isPurchasesSupported(): boolean {
   return Platform.OS === 'ios' || Platform.OS === 'android';
-}
-
-function getApiKey(): string {
-  return Platform.OS === 'ios' ? API_KEY_IOS : API_KEY_ANDROID;
 }
 
 async function getPurchases() {
@@ -18,16 +13,16 @@ async function getPurchases() {
   return mod.default;
 }
 
+/** Initialize RevenueCat with the API key */
 export async function initPurchases(appUserId?: string | null): Promise<boolean> {
   if (!isPurchasesSupported()) return false;
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    console.warn('[Purchases] No RevenueCat API key configured — skipping init');
-    return false;
-  }
   try {
     const Purchases = await getPurchases();
-    Purchases.configure({ apiKey, appUserID: appUserId ?? undefined });
+    Purchases.configure({ apiKey: API_KEY, appUserID: appUserId ?? undefined });
+    // Enable debug logs in development
+    if (__DEV__) {
+      Purchases.setLogLevel(Purchases.LOG_LEVEL.VERBOSE);
+    }
     return true;
   } catch (error: unknown) {
     console.error('[Purchases] init failed:', error);
@@ -35,6 +30,7 @@ export async function initPurchases(appUserId?: string | null): Promise<boolean>
   }
 }
 
+/** Check if user has the Pro entitlement */
 export async function checkProEntitlement(): Promise<boolean> {
   if (!isPurchasesSupported()) return false;
   try {
@@ -47,34 +43,78 @@ export async function checkProEntitlement(): Promise<boolean> {
   }
 }
 
-export interface PaywallPackage {
-  identifier: string;
-  title: string;
-  priceString: string;
-  hasFreeTrial: boolean;
-  rcPackage: unknown;
-}
-
-export async function getMonthlyPackage(): Promise<PaywallPackage | null> {
+/** Get full customer info (including all entitlements, subscriptions, etc.) */
+export async function getCustomerInfo(): Promise<Record<string, unknown> | null> {
   if (!isPurchasesSupported()) return null;
   try {
     const Purchases = await getPurchases();
-    const offerings = await Purchases.getOfferings();
-    const pkg = offerings.current?.monthly ?? offerings.current?.availablePackages[0];
-    if (!pkg) return null;
-    return {
-      identifier: pkg.identifier,
-      title: pkg.product.title,
-      priceString: pkg.product.priceString,
-      hasFreeTrial: pkg.product.introPrice != null,
-      rcPackage: pkg,
-    };
+    return await Purchases.getCustomerInfo();
   } catch (error: unknown) {
-    console.error('[Purchases] getOfferings failed:', error);
+    console.error('[Purchases] getCustomerInfo failed:', error);
     return null;
   }
 }
 
+export interface PaywallPackage {
+  identifier: string;
+  title: string;
+  priceString: string;
+  description: string;
+  hasFreeTrial: boolean;
+  freeTrialPeriod: string | null;
+  rcPackage: unknown;
+}
+
+function mapPackage(pkg: any): PaywallPackage {
+  const product = pkg.product;
+  const intro = product.introPrice;
+  return {
+    identifier: pkg.identifier,
+    title: product.title || pkg.identifier,
+    priceString: product.priceString || '',
+    description: product.description || '',
+    hasFreeTrial: intro?.price === 0 && intro?.periodNumberOfUnits != null,
+    freeTrialPeriod: intro?.price === 0 && intro?.periodNumberOfUnits
+      ? `${intro.periodNumberOfUnits} ${intro.periodUnit?.toLowerCase() || 'days'}`
+      : null,
+    rcPackage: pkg,
+  };
+}
+
+/** Get all available packages from the current offering */
+export async function getAllPackages(): Promise<{
+  monthly: PaywallPackage | null;
+  yearly: PaywallPackage | null;
+  lifetime: PaywallPackage | null;
+  all: PaywallPackage[];
+}> {
+  if (!isPurchasesSupported()) {
+    return { monthly: null, yearly: null, lifetime: null, all: [] };
+  }
+  try {
+    const Purchases = await getPurchases();
+    const offerings = await Purchases.getOfferings();
+    const current = offerings.current;
+
+    if (!current) {
+      console.warn('[Purchases] No current offering available');
+      return { monthly: null, yearly: null, lifetime: null, all: [] };
+    }
+
+    const all: PaywallPackage[] = (current.availablePackages || []).map(mapPackage);
+
+    const monthly = current.monthly ? mapPackage(current.monthly) : null;
+    const yearly = current.annual ? mapPackage(current.annual) : null;
+    const lifetime = current.lifetime ? mapPackage(current.lifetime) : null;
+
+    return { monthly, yearly, lifetime, all };
+  } catch (error: unknown) {
+    console.error('[Purchases] getOfferings failed:', error);
+    return { monthly: null, yearly: null, lifetime: null, all: [] };
+  }
+}
+
+/** Purchase a specific package */
 export async function purchasePackage(pkg: PaywallPackage): Promise<boolean> {
   try {
     const Purchases = await getPurchases();
@@ -90,6 +130,21 @@ export async function purchasePackage(pkg: PaywallPackage): Promise<boolean> {
   }
 }
 
+/** Purchase a specific product identifier directly */
+export async function purchaseProduct(identifier: string): Promise<boolean> {
+  try {
+    const Purchases = await getPurchases();
+    const { customerInfo } = await Purchases.purchaseProduct(identifier);
+    return customerInfo.entitlements.active[ENTITLEMENT_ID] !== undefined;
+  } catch (error: unknown) {
+    const cancelled =
+      typeof error === 'object' && error !== null && (error as { userCancelled?: boolean }).userCancelled;
+    if (!cancelled) console.error('[Purchases] purchaseProduct failed:', error);
+    return false;
+  }
+}
+
+/** Restore previous purchases */
 export async function restorePurchases(): Promise<boolean> {
   try {
     const Purchases = await getPurchases();
@@ -98,5 +153,58 @@ export async function restorePurchases(): Promise<boolean> {
   } catch (error: unknown) {
     console.error('[Purchases] restore failed:', error);
     return false;
+  }
+}
+
+/** Log out the current user (useful for account switching) */
+export async function logOut(): Promise<void> {
+  try {
+    const Purchases = await getPurchases();
+    await Purchases.logOut();
+  } catch (error: unknown) {
+    console.error('[Purchases] logOut failed:', error);
+  }
+}
+
+/** Sync purchaser info with RevenueCat (useful after login) */
+export async function syncPurchases(): Promise<void> {
+  try {
+    const Purchases = await getPurchases();
+    await Purchases.syncPurchases();
+  } catch (error: unknown) {
+    console.error('[Purchases] syncPurchases failed:', error);
+  }
+}
+
+/** Get available discounts / intro offers for a product */
+export async function getPromotionalOffer(productIdentifier: string, discountIdentifier: string): Promise<unknown | null> {
+  try {
+    const Purchases = await getPurchases();
+    return await Purchases.getPromotionalOffer(productIdentifier, discountIdentifier);
+  } catch (error: unknown) {
+    console.error('[Purchases] getPromotionalOffer failed:', error);
+    return null;
+  }
+}
+
+/** Set a custom user attribute for RevenueCat */
+export async function setAttributes(attributes: Record<string, string | number | boolean>): Promise<void> {
+  try {
+    const Purchases = await getPurchases();
+    await Purchases.setAttributes(attributes as Record<string, string>);
+  } catch (error: unknown) {
+    console.error('[Purchases] setAttributes failed:', error);
+  }
+}
+
+/** Set a custom user ID (alias for login) */
+export async function logIn(appUserId: string): Promise<Record<string, unknown> | null> {
+  try {
+    const Purchases = await getPurchases();
+    const { customerInfo } = await Purchases.logIn(appUserId);
+    return customerInfo;
+  } catch (error: unknown) {
+    console.error('[Purchases] logIn failed:', error);
+    return null;
   }
 }

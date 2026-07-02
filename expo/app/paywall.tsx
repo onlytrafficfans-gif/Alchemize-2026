@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Text, ScrollView, Alert, ActivityIndicator, Linking } from 'react-native';
+import { View, StyleSheet, Text, ScrollView, Alert, ActivityIndicator, Image, Linking } from 'react-native';
 import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Sparkles, Check } from 'lucide-react-native';
+import { Sparkles, Check, Crown } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
 import { useSubscription } from '@/contexts/subscription-context';
+import type { PaywallPackage } from '@/lib/purchases';
 
 const FEATURES = [
   'Manifestation boards & slideshows',
@@ -15,35 +16,36 @@ const FEATURES = [
   'Financial tracker & secure notes',
   'Affirmations with play mode',
   'Fitness & workout library',
+  'Unlimited entries & boards',
+  'Priority support',
 ];
-
-const FALLBACK_PRICE = '$15.55/month';
 
 export default function PaywallScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { monthlyPackage, purchase, restore } = useSubscription();
-  const [busy, setBusy] = useState<'purchase' | 'restore' | null>(null);
-
-  const priceLabel = monthlyPackage?.priceString
-    ? `${monthlyPackage.priceString}/month`
-    : FALLBACK_PRICE;
+  const {
+    monthlyPackage,
+    yearlyPackage,
+    lifetimePackage,
+    allPackages,
+    purchase,
+    restore,
+  } = useSubscription();
+  const [busy, setBusy] = useState<string | null>(null);
 
   const legalUrls = (Constants.expoConfig?.extra?.legalUrls ?? {}) as {
     privacy?: string;
     termsOfService?: string;
   };
 
-  const handlePurchase = async () => {
-    setBusy('purchase');
+  const handlePurchase = async (pkg: PaywallPackage) => {
+    setBusy(pkg.identifier);
     try {
-      const ok = await purchase();
+      const ok = await purchase(pkg);
       if (ok) {
         router.replace('/');
-      } else if (monthlyPackage) {
-        Alert.alert('Purchase not completed', 'Your purchase did not go through. Please try again.');
       } else {
-        Alert.alert('Unavailable', 'Subscriptions are not available right now. Please try again later.');
+        Alert.alert('Purchase not completed', 'Your purchase did not go through. Please try again.');
       }
     } finally {
       setBusy(null);
@@ -64,24 +66,76 @@ export default function PaywallScreen() {
     }
   };
 
+  const renderPackage = (pkg: PaywallPackage | null, label: string, badge?: string) => {
+    if (!pkg) return null;
+    const isBusy = busy === pkg.identifier;
+    const hasTrial = pkg.hasFreeTrial && pkg.freeTrialPeriod;
+
+    return (
+      <TouchableOpacity
+        key={pkg.identifier}
+        style={styles.planCard}
+        onPress={() => handlePurchase(pkg)}
+        disabled={isBusy || busy !== null}
+        activeOpacity={0.85}
+      >
+        {badge ? (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
+        ) : null}
+        <Text style={styles.planLabel}>{label}</Text>
+        <Text style={styles.planPrice}>{pkg.priceString}</Text>
+        {hasTrial ? (
+          <Text style={styles.trialText}>Free trial: {pkg.freeTrialPeriod}</Text>
+        ) : null}
+        <Text style={styles.planDescription}>{pkg.description}</Text>
+        {isBusy ? (
+          <ActivityIndicator color="#a78bfa" style={{ marginTop: 8 }} />
+        ) : (
+          <View style={styles.selectButton}>
+            <Text style={styles.selectButtonText}>Select</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <LinearGradient colors={['#1a0a3e', '#0c0520', '#0d1033']} style={StyleSheet.absoluteFill} />
       <ScrollView
         contentContainerStyle={[
           styles.content,
-          { paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 },
+          { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 24 },
         ]}
         showsVerticalScrollIndicator={false}
       >
+        {/* Hero Image */}
+        <View style={styles.heroWrap}>
+          <Image
+            source={require('../assets/images/paywall-hero.png')}
+            style={styles.heroImage}
+            resizeMode="contain"
+          />
+        </View>
+
         <View style={styles.iconWrap}>
-          <Sparkles color="#a78bfa" size={40} />
+          <Crown color="#a78bfa" size={32} />
         </View>
         <Text style={styles.title}>Unlock Alchemize Pro</Text>
         <Text style={styles.subtitle}>
-          Start your 7-day free trial, then {priceLabel}. Cancel anytime.
+          Choose the plan that works for you. Cancel anytime.
         </Text>
 
+        {/* Plans */}
+        <View style={styles.plansRow}>
+          {renderPackage(monthlyPackage, 'Monthly')}
+          {renderPackage(yearlyPackage, 'Yearly', 'Best Value')}
+        </View>
+        {renderPackage(lifetimePackage, 'Lifetime', 'One-Time')}
+
+        {/* Features */}
         <View style={styles.featureList}>
           {FEATURES.map((feature) => (
             <View key={feature} style={styles.featureRow}>
@@ -91,23 +145,7 @@ export default function PaywallScreen() {
           ))}
         </View>
 
-        <TouchableOpacity
-          style={styles.ctaButton}
-          onPress={handlePurchase}
-          disabled={busy !== null}
-          activeOpacity={0.85}
-          testID="paywall-purchase-button"
-        >
-          {busy === 'purchase' ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <>
-              <Text style={styles.ctaText}>Start 7-Day Free Trial</Text>
-              <Text style={styles.ctaSubtext}>then {priceLabel}</Text>
-            </>
-          )}
-        </TouchableOpacity>
-
+        {/* Restore */}
         <TouchableOpacity onPress={handleRestore} disabled={busy !== null} style={styles.restoreButton}>
           {busy === 'restore' ? (
             <ActivityIndicator color="#a78bfa" size="small" />
@@ -116,10 +154,10 @@ export default function PaywallScreen() {
           )}
         </TouchableOpacity>
 
+        {/* Legal */}
         <Text style={styles.legalText}>
-          Payment is charged to your Apple ID at the end of the free trial. The subscription renews
-          automatically at {priceLabel} unless cancelled at least 24 hours before the end of the
-          current period. Manage or cancel in your App Store account settings.
+          Subscriptions automatically renew unless cancelled at least 24 hours before the end of the
+          current period. Manage or cancel in your account settings.
         </Text>
 
         <View style={styles.legalLinks}>
@@ -145,31 +183,106 @@ const styles = StyleSheet.create({
     backgroundColor: '#0c0520',
   },
   content: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     alignItems: 'center',
   },
+  heroWrap: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  heroImage: {
+    width: 320,
+    height: 560,
+    borderRadius: 20,
+  },
   iconWrap: {
-    width: 80,
-    height: 80,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
     backgroundColor: 'rgba(167, 139, 250, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: 16,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: '800' as const,
     color: '#fff',
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    color: 'rgba(255,255,255,0.7)',
+    fontSize: 15,
+    color: 'rgba(255,255,255,0.65)',
     textAlign: 'center',
-    marginBottom: 32,
+    marginBottom: 24,
     lineHeight: 22,
+  },
+  plansRow: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+    marginBottom: 12,
+  },
+  planCard: {
+    flex: 1,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 16,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  badge: {
+    position: 'absolute',
+    top: -10,
+    backgroundColor: '#8B5CF6',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700' as const,
+  },
+  planLabel: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.7)',
+    fontWeight: '600' as const,
+    marginBottom: 4,
+  },
+  planPrice: {
+    fontSize: 22,
+    fontWeight: '800' as const,
+    color: '#fff',
+    marginBottom: 4,
+  },
+  trialText: {
+    fontSize: 12,
+    color: '#10b981',
+    fontWeight: '600' as const,
+    marginBottom: 6,
+  },
+  planDescription: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  selectButton: {
+    backgroundColor: 'rgba(139, 92, 246, 0.2)',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.4)',
+  },
+  selectButtonText: {
+    color: '#a78bfa',
+    fontSize: 13,
+    fontWeight: '700' as const,
   },
   featureList: {
     alignSelf: 'stretch',
@@ -177,7 +290,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 20,
     gap: 14,
-    marginBottom: 32,
+    marginBottom: 24,
+    marginTop: 16,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
@@ -191,24 +305,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.85)',
     flex: 1,
   },
-  ctaButton: {
-    alignSelf: 'stretch',
-    backgroundColor: '#8B5CF6',
-    borderRadius: 16,
-    paddingVertical: 18,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  ctaText: {
-    fontSize: 17,
-    fontWeight: '700' as const,
-    color: '#fff',
-  },
-  ctaSubtext: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.75)',
-    marginTop: 4,
-  },
   restoreButton: {
     paddingVertical: 12,
     marginBottom: 20,
@@ -220,7 +316,7 @@ const styles = StyleSheet.create({
   },
   legalText: {
     fontSize: 12,
-    color: 'rgba(255,255,255,0.4)',
+    color: 'rgba(255,255,255,0.35)',
     textAlign: 'center',
     lineHeight: 18,
     marginBottom: 16,

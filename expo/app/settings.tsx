@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   Text,
   ScrollView,
   Alert,
@@ -13,7 +12,9 @@ import {
   Linking,
   Image,
   Switch,
+  Animated,
 } from 'react-native';
+import PressableScale from '@/components/PressableScale';
 import { useRouter } from 'expo-router';
 import { useTheme } from '@/contexts/theme-context';
 import { useAuth } from '@/contexts/auth-context';
@@ -124,6 +125,24 @@ export default function SettingsScreen() {
   const [supportIssueType, setSupportIssueType] = useState<'bug' | 'feature' | 'account' | 'other'>('bug');
   const [supportMessage, setSupportMessage] = useState<string>('');
   const [supportSending, setSupportSending] = useState<boolean>(false);
+  const entranceFade = useRef(new Animated.Value(0)).current;
+  const entranceRise = useRef(new Animated.Value(14)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(entranceFade, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+      Animated.spring(entranceRise, {
+        toValue: 0,
+        useNativeDriver: true,
+        speed: 12,
+        bounciness: 4,
+      }),
+    ]).start();
+  }, [entranceFade, entranceRise]);
 
   const loadProfile = useCallback(async () => {
     try {
@@ -693,15 +712,16 @@ export default function SettingsScreen() {
         resizeMode="cover"
       />
       <View style={styles.backgroundOverlay} />
+      <Animated.View style={{ flex: 1, opacity: entranceFade, transform: [{ translateY: entranceRise }] }}>
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.content}>
       {/* Account Overview Header */}
       <View style={styles.profileHeader}>
-        <TouchableOpacity style={styles.avatarContainer} onPress={handleAvatarPress}>
+        <PressableScale style={styles.avatarContainer} onPress={handleAvatarPress}>
           {renderAvatar(80)}
           <View style={styles.cameraBadge}>
             <Camera color="#fff" size={14} />
           </View>
-        </TouchableOpacity>
+        </PressableScale>
         <Text style={styles.displayName}>{profile.displayName}</Text>
         <Text style={styles.email}>{profile.email}</Text>
       </View>
@@ -711,7 +731,7 @@ export default function SettingsScreen() {
         <Text style={styles.sectionTitle}>ACCOUNT</Text>
         
         {!user ? (
-          <TouchableOpacity style={styles.settingRow} onPress={() => router.push('/auth' as any)}>
+          <PressableScale style={styles.settingRow} onPress={() => router.push('/auth' as any)}>
             <View style={styles.settingRowLeft}>
               <View style={styles.iconContainer}>
                 <User color="#a78bfa" size={20} />
@@ -722,10 +742,10 @@ export default function SettingsScreen() {
               </View>
             </View>
             <ChevronRight color="#666" size={20} />
-          </TouchableOpacity>
+          </PressableScale>
         ) : (
           <>
-            <TouchableOpacity style={styles.settingRow} onPress={openEditProfile}>
+            <PressableScale style={styles.settingRow} onPress={openEditProfile}>
               <View style={styles.settingRowLeft}>
                 <View style={styles.iconContainer}>
                   <User color="#a78bfa" size={20} />
@@ -736,9 +756,9 @@ export default function SettingsScreen() {
                 </View>
               </View>
               <ChevronRight color="#666" size={20} />
-            </TouchableOpacity>
+            </PressableScale>
 
-            <TouchableOpacity style={styles.settingRow} disabled>
+            <PressableScale style={styles.settingRow} disabled>
               <View style={styles.settingRowLeft}>
                 <View style={styles.iconContainer}>
                   <Mail color="#a78bfa" size={20} />
@@ -748,7 +768,7 @@ export default function SettingsScreen() {
                   <Text style={styles.settingSubtitle}>{profile.email}</Text>
                 </View>
               </View>
-            </TouchableOpacity>
+            </PressableScale>
           </>
         )}
       </View>
@@ -757,7 +777,7 @@ export default function SettingsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>APP</Text>
         
-        <TouchableOpacity style={styles.settingRow} onPress={() => setAboutVisible(true)}>
+        <PressableScale style={styles.settingRow} onPress={() => setAboutVisible(true)}>
           <View style={styles.settingRowLeft}>
             <View style={styles.iconContainer}>
               <Info color="#a78bfa" size={20} />
@@ -768,9 +788,9 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={() => setTermsVisible(true)}>
+        <PressableScale style={styles.settingRow} onPress={() => setTermsVisible(true)}>
           <View style={styles.settingRowLeft}>
             <View style={styles.iconContainer}>
               <FileText color="#a78bfa" size={20} />
@@ -781,9 +801,9 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={() => setPrivacyVisible(true)}>
+        <PressableScale style={styles.settingRow} onPress={() => setPrivacyVisible(true)}>
           <View style={styles.settingRowLeft}>
             <View style={styles.iconContainer}>
               <Shield color="#a78bfa" size={20} />
@@ -794,9 +814,9 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={() => setFeaturesVisible(true)}>
+        <PressableScale style={styles.settingRow} onPress={() => setFeaturesVisible(true)}>
           <View style={styles.settingRowLeft}>
             <View style={styles.iconContainer}>
               <Eye color="#a78bfa" size={20} />
@@ -807,9 +827,9 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={handleHealthKitPress}>
+        <PressableScale style={styles.settingRow} onPress={handleHealthKitPress}>
           <View style={styles.settingRowLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(239, 68, 68, 0.15)' }]}>
               <Watch color="#ef4444" size={20} />
@@ -828,9 +848,9 @@ export default function SettingsScreen() {
           ) : (
             <ChevronRight color="#666" size={20} />
           )}
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={handleToggleNotifications}>
+        <PressableScale style={styles.settingRow} onPress={handleToggleNotifications}>
           <View style={styles.settingRowLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(59, 130, 246, 0.15)' }]}>
               <Bell color="#3b82f6" size={20} />
@@ -847,9 +867,9 @@ export default function SettingsScreen() {
           ) : (
             <ChevronRight color="#666" size={20} />
           )}
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={handleToggleCalendar}>
+        <PressableScale style={styles.settingRow} onPress={handleToggleCalendar}>
           <View style={styles.settingRowLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(34, 197, 94, 0.15)' }]}>
               <CalendarDays color="#22c55e" size={20} />
@@ -866,9 +886,9 @@ export default function SettingsScreen() {
           ) : (
             <ChevronRight color="#666" size={20} />
           )}
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity style={styles.settingRow} onPress={() => setThemeModalVisible(true)}>
+        <PressableScale style={styles.settingRow} onPress={() => setThemeModalVisible(true)}>
           <View style={styles.settingRowLeft}>
             <View style={styles.iconContainer}>
               <Palette color="#a78bfa" size={20} />
@@ -879,10 +899,10 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
         {Platform.OS === 'web' && (
-          <TouchableOpacity style={styles.settingRow} onPress={handlePwaInstall}>
+          <PressableScale style={styles.settingRow} onPress={handlePwaInstall}>
             <View style={styles.settingRowLeft}>
               <View style={[styles.iconContainer, { backgroundColor: 'rgba(251, 191, 36, 0.15)' }]}>
                 {isPwaInstalled ? (
@@ -903,7 +923,7 @@ export default function SettingsScreen() {
             ) : (
               <ChevronRight color="#666" size={20} />
             )}
-          </TouchableOpacity>
+          </PressableScale>
         )}
 
 
@@ -912,7 +932,7 @@ export default function SettingsScreen() {
       {/* Support Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>SUPPORT</Text>
-        <TouchableOpacity style={styles.settingRow} onPress={() => setSupportVisible(true)} testID="customer-support-row">
+        <PressableScale style={styles.settingRow} onPress={() => setSupportVisible(true)} testID="customer-support-row">
           <View style={styles.settingRowLeft}>
             <View style={[styles.iconContainer, { backgroundColor: 'rgba(167, 139, 250, 0.15)' }]}>
               <LifeBuoy color="#a78bfa" size={20} />
@@ -923,13 +943,13 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
       </View>
 
       {/* Data Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>DATA</Text>
-        <TouchableOpacity style={styles.dangerRow} onPress={handleResetData}>
+        <PressableScale style={styles.dangerRow} onPress={handleResetData}>
           <View style={styles.settingRowLeft}>
             <View style={[styles.iconContainer, styles.dangerIcon]}>
               <Trash2 color="#ef4444" size={20} />
@@ -940,10 +960,10 @@ export default function SettingsScreen() {
             </View>
           </View>
           <ChevronRight color="#666" size={20} />
-        </TouchableOpacity>
+        </PressableScale>
 
         {user && (
-          <TouchableOpacity style={styles.dangerRow} onPress={handleDeleteAccount}>
+          <PressableScale style={styles.dangerRow} onPress={handleDeleteAccount}>
             <View style={styles.settingRowLeft}>
               <View style={[styles.iconContainer, styles.dangerIcon]}>
                 <Trash2 color="#ef4444" size={20} />
@@ -954,16 +974,16 @@ export default function SettingsScreen() {
               </View>
             </View>
             <ChevronRight color="#666" size={20} />
-          </TouchableOpacity>
+          </PressableScale>
         )}
       </View>
 
       {/* Sign Out Button - Only show when logged in */}
       {user && (
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <PressableScale style={styles.signOutButton} onPress={handleSignOut}>
           <LogOut color="#ef4444" size={20} />
           <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
+        </PressableScale>
       )}
 
       {/* Footer */}
@@ -986,15 +1006,15 @@ export default function SettingsScreen() {
               To update your profile photo, Alchemize needs access to your camera and photo library.
             </Text>
             <View style={styles.modalButtons}>
-              <TouchableOpacity
+              <PressableScale
                 style={styles.modalButtonSecondary}
                 onPress={() => setPermissionModalVisible(false)}
               >
                 <Text style={styles.modalButtonSecondaryText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.modalButtonPrimary} onPress={openSystemSettings}>
+              </PressableScale>
+              <PressableScale style={styles.modalButtonPrimary} onPress={openSystemSettings}>
                 <Text style={styles.modalButtonPrimaryText}>Open Settings</Text>
-              </TouchableOpacity>
+              </PressableScale>
             </View>
           </View>
         </View>
@@ -1011,15 +1031,15 @@ export default function SettingsScreen() {
           <View style={styles.editProfileModal}>
             <View style={styles.editProfileHeader}>
               <Text style={styles.editProfileTitle}>Edit Profile</Text>
-              <TouchableOpacity onPress={() => setEditProfileVisible(false)}>
+              <PressableScale onPress={() => setEditProfileVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
 
-            <TouchableOpacity style={styles.editAvatarContainer} onPress={handleAvatarPress}>
+            <PressableScale style={styles.editAvatarContainer} onPress={handleAvatarPress}>
               {renderAvatar(100)}
               <Text style={styles.changePhotoText}>Change Photo</Text>
-            </TouchableOpacity>
+            </PressableScale>
 
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Display Name</Text>
@@ -1034,15 +1054,15 @@ export default function SettingsScreen() {
             </View>
 
             <View style={styles.editProfileButtons}>
-              <TouchableOpacity
+              <PressableScale
                 style={styles.cancelButton}
                 onPress={() => setEditProfileVisible(false)}
               >
                 <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
+              </PressableScale>
+              <PressableScale style={styles.saveButton} onPress={handleSaveProfile}>
                 <Text style={styles.saveButtonText}>Save</Text>
-              </TouchableOpacity>
+              </PressableScale>
             </View>
           </View>
         </View>
@@ -1059,9 +1079,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>About Alchemize</Text>
-              <TouchableOpacity onPress={() => setAboutVisible(false)}>
+              <PressableScale onPress={() => setAboutVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.aboutText}>
@@ -1094,9 +1114,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>Terms & Conditions</Text>
-              <TouchableOpacity onPress={() => setTermsVisible(false)}>
+              <PressableScale onPress={() => setTermsVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.legalTitle}>ALCHEMIZE TERMS & CONDITIONS</Text>
@@ -1195,9 +1215,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>Manage Features</Text>
-              <TouchableOpacity onPress={() => setFeaturesVisible(false)}>
+              <PressableScale onPress={() => setFeaturesVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.featuresDescription}>
@@ -1232,11 +1252,11 @@ export default function SettingsScreen() {
           <View style={styles.themeModal}>
             <View style={styles.themeModalHeader}>
               <Text style={styles.modalTitle}>Select Theme</Text>
-              <TouchableOpacity onPress={() => setThemeModalVisible(false)}>
+              <PressableScale onPress={() => setThemeModalVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
-            <TouchableOpacity
+            <PressableScale
               style={[
                 styles.themeOption,
                 theme === 'cosmic-dark' && styles.themeOptionActive,
@@ -1257,8 +1277,8 @@ export default function SettingsScreen() {
                   <Text style={styles.themeCheckmarkText}>✓</Text>
                 </View>
               )}
-            </TouchableOpacity>
-            <TouchableOpacity
+            </PressableScale>
+            <PressableScale
               style={[
                 styles.themeOption,
                 theme === 'cosmic' && styles.themeOptionActive,
@@ -1279,7 +1299,7 @@ export default function SettingsScreen() {
                   <Text style={styles.themeCheckmarkText}>✓</Text>
                 </View>
               )}
-            </TouchableOpacity>
+            </PressableScale>
           </View>
         </View>
       </Modal>
@@ -1295,9 +1315,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>Privacy Policy</Text>
-              <TouchableOpacity onPress={() => setPrivacyVisible(false)}>
+              <PressableScale onPress={() => setPrivacyVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false}>
               <Text style={styles.legalTitle}>ALCHEMIZE PRIVACY POLICY</Text>
@@ -1375,9 +1395,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>Customer Support</Text>
-              <TouchableOpacity onPress={() => setSupportVisible(false)} testID="close-support-modal">
+              <PressableScale onPress={() => setSupportVisible(false)} testID="close-support-modal">
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
               <Text style={styles.supportIntro}>
@@ -1395,7 +1415,7 @@ export default function SettingsScreen() {
                   const Icon = opt.icon;
                   const active = supportIssueType === opt.id;
                   return (
-                    <TouchableOpacity
+                    <PressableScale
                       key={opt.id}
                       style={[styles.supportTypeChip, active && { borderColor: opt.color, backgroundColor: `${opt.color}22` }]}
                       onPress={() => setSupportIssueType(opt.id)}
@@ -1403,7 +1423,7 @@ export default function SettingsScreen() {
                     >
                       <Icon color={active ? opt.color : '#888'} size={18} />
                       <Text style={[styles.supportTypeChipText, active && { color: opt.color }]}>{opt.label}</Text>
-                    </TouchableOpacity>
+                    </PressableScale>
                   );
                 })}
               </View>
@@ -1422,7 +1442,7 @@ export default function SettingsScreen() {
               />
               <Text style={styles.supportCounter}>{supportMessage.length}/2000</Text>
 
-              <TouchableOpacity
+              <PressableScale
                 style={[styles.supportSubmit, supportSending && { opacity: 0.6 }]}
                 onPress={handleSubmitSupport}
                 disabled={supportSending}
@@ -1432,7 +1452,7 @@ export default function SettingsScreen() {
                 <Text style={styles.supportSubmitText}>
                   {supportSending ? 'Sending...' : 'Send Report'}
                 </Text>
-              </TouchableOpacity>
+              </PressableScale>
 
               <Text style={styles.supportFooter}>
                 Or email us directly at support@alchemize.app
@@ -1454,9 +1474,9 @@ export default function SettingsScreen() {
           <View style={styles.fullModal}>
             <View style={styles.fullModalHeader}>
               <Text style={styles.fullModalTitle}>Apple Health</Text>
-              <TouchableOpacity onPress={() => setHealthKitModalVisible(false)}>
+              <PressableScale onPress={() => setHealthKitModalVisible(false)}>
                 <X color="#fff" size={24} />
-              </TouchableOpacity>
+              </PressableScale>
             </View>
             <ScrollView style={styles.fullModalScroll} showsVerticalScrollIndicator={false}>
               <View style={styles.healthKitHero}>
@@ -1510,7 +1530,7 @@ export default function SettingsScreen() {
                     <Text style={styles.healthKitSyncValue}>{formatLastSync(healthKitLastSync)}</Text>
                   </View>
 
-                  <TouchableOpacity
+                  <PressableScale
                     style={[styles.healthKitSyncButton, isSyncingHealthKit && styles.healthKitSyncButtonDisabled]}
                     onPress={handleSyncHealthKit}
                     disabled={isSyncingHealthKit}
@@ -1519,14 +1539,14 @@ export default function SettingsScreen() {
                     <Text style={styles.healthKitSyncButtonText}>
                       {isSyncingHealthKit ? 'Syncing...' : 'Sync Now'}
                     </Text>
-                  </TouchableOpacity>
+                  </PressableScale>
 
-                  <TouchableOpacity
+                  <PressableScale
                     style={styles.healthKitDisconnectButton}
                     onPress={handleDisableHealthKit}
                   >
                     <Text style={styles.healthKitDisconnectText}>Disconnect Apple Health</Text>
-                  </TouchableOpacity>
+                  </PressableScale>
                 </>
               ) : (
                 <>
@@ -1571,7 +1591,7 @@ export default function SettingsScreen() {
                     </View>
                   )}
 
-                  <TouchableOpacity
+                  <PressableScale
                     style={[
                       styles.healthKitConnectButton,
                       Platform.OS !== 'ios' && styles.healthKitConnectButtonDisabled,
@@ -1581,7 +1601,7 @@ export default function SettingsScreen() {
                   >
                     <Heart color="#fff" size={20} />
                     <Text style={styles.healthKitConnectText}>Connect Apple Health</Text>
-                  </TouchableOpacity>
+                  </PressableScale>
 
                   <Text style={styles.healthKitDisclaimer}>
                     Your health data stays on your device. We only read workout and activity data to enhance your tracking experience.
@@ -1594,6 +1614,7 @@ export default function SettingsScreen() {
         </View>
       </Modal>
       </ScrollView>
+      </Animated.View>
     </View>
   );
 }
@@ -1631,7 +1652,7 @@ const styles = StyleSheet.create({
     paddingVertical: 32,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#1a1a1a',
+    borderBottomColor: 'rgba(167, 139, 250, 0.12)',
   },
   avatarContainer: {
     position: 'relative',
@@ -1677,8 +1698,8 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600' as const,
-    color: '#666',
-    letterSpacing: 1,
+    color: '#8b82a8',
+    letterSpacing: 1.4,
     marginBottom: 12,
     marginLeft: 4,
   },
@@ -1686,10 +1707,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#141414',
+    backgroundColor: 'rgba(22, 17, 42, 0.78)',
     padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderRadius: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.10)',
   },
   settingRowLeft: {
     flexDirection: 'row',
@@ -1725,10 +1748,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#141414',
+    backgroundColor: 'rgba(30, 14, 20, 0.78)',
     padding: 16,
-    borderRadius: 12,
-    marginBottom: 8,
+    borderRadius: 14,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.14)',
   },
   dangerTitle: {
     fontSize: 16,
@@ -2072,10 +2097,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#141414',
+    backgroundColor: 'rgba(22, 17, 42, 0.78)',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(167, 139, 250, 0.10)',
   },
   featureToggleTitle: {
     fontSize: 16,

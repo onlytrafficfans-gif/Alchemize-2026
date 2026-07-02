@@ -61,6 +61,20 @@ async function fetchAllForUser(userId: string): Promise<Appointment[]> {
   return (data ?? []).map(mapRow);
 }
 
+async function fetchById(userId: string, id: string): Promise<Appointment | null> {
+  const supabase = getSupabase();
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select('*')
+    .eq('id', id)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  logSupabaseOp('SELECT', TABLE, { error }, `id=${id} found=${!!data}`);
+  if (error) throw error;
+  return data ? mapRow(data) : null;
+}
+
 async function createAppointment(appointment: Appointment): Promise<Appointment> {
   const userId = getSupabaseUserId();
   const supabase = getSupabase();
@@ -126,6 +140,17 @@ export const appointmentSupabase = {
     } catch (error: any) {
       console.error('[AppointmentService] fetchAll failed:', error?.message || error);
       return { success: false, error: error?.message || 'Failed to load appointments', data: [] };
+    }
+  },
+
+  async getById(id: string): Promise<AppointmentServiceResult> {
+    try {
+      const userId = getSupabaseUserId();
+      const data = await fetchById(userId, id);
+      return { success: true, data };
+    } catch (error: any) {
+      console.error('[AppointmentService] getById failed:', error?.message || error);
+      return { success: false, error: error?.message || 'Failed to load appointment', data: null };
     }
   },
 

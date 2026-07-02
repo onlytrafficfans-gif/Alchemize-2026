@@ -58,21 +58,18 @@ export default function AddAppointmentScreen() {
 
   const loadAppointment = async (id: string) => {
     try {
-      const result = await appointmentSupabase.fetchAll();
+      const result = await appointmentSupabase.getById(id);
       if (result.success && result.data) {
-        const appointments = result.data as Appointment[];
-        const appointment = appointments.find((a) => a.id === id);
-        if (appointment) {
-          setTitle(appointment.title);
-          setSelectedDate(new Date(appointment.date));
-          setSelectedTime(appointment.time);
-          setCategory(appointment.category);
-          setNotes(appointment.notes);
-          setReminder(appointment.reminder);
-          setIsEditing(true);
-          setEditingId(id);
-          console.log('[Appointments] Loaded appointment for editing from Supabase:', id);
-        }
+        const appointment = result.data as Appointment;
+        setTitle(appointment.title);
+        setSelectedDate(new Date(appointment.date));
+        setSelectedTime(appointment.time);
+        setCategory(appointment.category);
+        setNotes(appointment.notes);
+        setReminder(appointment.reminder);
+        setIsEditing(true);
+        setEditingId(id);
+        console.log('[Appointments] Loaded appointment for editing from Supabase:', id);
       }
     } catch (error) {
       console.error('[Appointments] Error loading appointment:', error);
@@ -88,14 +85,14 @@ export default function AddAppointmentScreen() {
     setSaving(true);
     try {
       const appointment: Appointment = {
-        id: editingId || `apt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: editingId || `apt_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
         title: title.trim(),
         date: startOfLocalDay(selectedDate).getTime(),
         time: selectedTime,
         category,
         notes: notes.trim(),
         reminder,
-        createdAt: editingId ? Date.now() : Date.now(),
+        createdAt: Date.now(),
       };
 
       let result;

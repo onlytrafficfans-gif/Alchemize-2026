@@ -40,7 +40,7 @@ export async function seedWorkoutTemplates() {
   
   for (const template of WORKOUT_TEMPLATES) {
     await workoutTemplatesDb.create({
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
       ...template,
     });
   }
@@ -58,7 +58,7 @@ export async function seedAwards() {
   
   for (const award of awards) {
     await awardsDb.create({
-      id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+      id: Date.now().toString() + Math.random().toString(36).substring(2, 11),
       ...award,
     });
   }

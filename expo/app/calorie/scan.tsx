@@ -282,7 +282,7 @@ export default function FoodScannerScreen() {
       if (Platform.OS === 'web') return;
 
       const logs: FoodLog[] = foods.map((food) => ({
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         foodName: food.name,
         servingDescription: food.servingSize,
         calories: Math.round(food.calories),
@@ -299,7 +299,7 @@ export default function FoodScannerScreen() {
       }));
 
       for (const log of logs) {
-        const calendarEventId = `cal-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const calendarEventId = `cal-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
         const loggedDate = new Date(log.loggedAt);
         const timeStr = loggedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
@@ -431,7 +431,7 @@ export default function FoodScannerScreen() {
       if (isNaN(calories)) return;
 
       const log: FoodLog = {
-        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        id: `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`,
         foodName: barcodeFoodName.trim(),
         servingDescription: '1 serving (barcode scanned)',
         calories,

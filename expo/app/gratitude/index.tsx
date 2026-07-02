@@ -2,7 +2,7 @@ import React, { memo, useCallback, useEffect, useMemo, useRef, useState, type Re
 import { Animated, Easing, Platform, ScrollView, StyleProp, StyleSheet, Text, TouchableOpacity, View, type ViewStyle } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { ArrowLeft, ChevronLeft, ChevronRight, Compass, Flame, Heart, House, Plus, User } from 'lucide-react-native';
+import { ArrowLeft, ChevronLeft, ChevronRight, Compass, Edit3, Flame, Heart, House, Plus, User } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -244,8 +244,18 @@ export default function GratitudeJournalScreen() {
     });
   }, [selectedDate]);
 
+  // Find the entry for the currently selected date
+  const selectedEntry = useMemo<GratitudeEntry | null>(() => {
+    return entries.find((entry) => startOfLocalDay(new Date(entry.entryDate)).getTime() === selectedDate) ?? null;
+  }, [entries, selectedDate]);
+
   const handleOpenAddEntry = useCallback(() => {
     console.log('[GratitudeJournal] Opening add entry for date:', selectedDate);
+    router.push(`/gratitude/add?date=${selectedDate}` as any);
+  }, [router, selectedDate]);
+
+  const handleEditEntry = useCallback(() => {
+    console.log('[GratitudeJournal] Editing entry for date:', selectedDate);
     router.push(`/gratitude/add?date=${selectedDate}` as any);
   }, [router, selectedDate]);
 
@@ -474,41 +484,95 @@ export default function GratitudeJournalScreen() {
                 },
               ]}
             >
-              <View style={styles.emptyState} testID="gratitude-empty-state">
-                <View style={styles.emptyIconWrap}>
-                  <View style={styles.emptyIconGlow} />
-                  <Heart color="#8F49FF" size={72} strokeWidth={1.8} />
-                </View>
-                <Text style={styles.emptyTitle}>Start your gratitude journey</Text>
-              </View>
+              {selectedEntry ? (
+                <>
+                  <View style={styles.entryCard} testID="gratitude-existing-entry">
+                    <View style={styles.entryCardHeader}>
+                      <Text style={styles.entryCardTitle}>
+                        {new Date(selectedDate).toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })}
+                      </Text>
+                      <TouchableOpacity
+                        activeOpacity={0.85}
+                        onPress={handleEditEntry}
+                        style={styles.editButtonSmall}
+                        testID="gratitude-edit-button"
+                      >
+                        <Edit3 color="#F4C95D" size={18} strokeWidth={2} />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={styles.entryItem}>1. {selectedEntry.gratitude1}</Text>
+                    {selectedEntry.gratitude2 ? (
+                      <Text style={styles.entryItem}>2. {selectedEntry.gratitude2}</Text>
+                    ) : null}
+                    {selectedEntry.gratitude3 ? (
+                      <Text style={styles.entryItem}>3. {selectedEntry.gratitude3}</Text>
+                    ) : null}
+                    {selectedEntry.reflection ? (
+                      <>
+                        <View style={styles.entryDivider} />
+                        <Text style={styles.entryReflectionLabel}>Reflection</Text>
+                        <Text style={styles.entryReflection}>{selectedEntry.reflection}</Text>
+                      </>
+                    ) : null}
+                  </View>
 
-              <View style={styles.ctaWrap}>
-                <Animated.View
-                  pointerEvents="none"
-                  style={[
-                    styles.ctaGlow,
-                    {
-                      opacity: ctaGlowOpacity,
-                      transform: [{ scale: ctaGlowScale }],
-                    },
-                  ]}
-                />
-                <TouchableOpacity
-                  activeOpacity={0.92}
-                  onPress={handleOpenAddEntry}
-                  style={styles.ctaTouch}
-                  testID="gratitude-cta-button"
-                >
-                  <LinearGradient
-                    colors={['#9E38FF', '#6E49FF', '#4B73FF']}
-                    start={{ x: 0, y: 0.5 }}
-                    end={{ x: 1, y: 0.5 }}
-                    style={styles.ctaButton}
-                  >
-                    <Text style={styles.ctaText}>Add Your First Entry</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
+                  <View style={styles.ctaWrap}>
+                    <TouchableOpacity
+                      activeOpacity={0.92}
+                      onPress={handleEditEntry}
+                      style={styles.ctaTouch}
+                      testID="gratitude-cta-button"
+                    >
+                      <LinearGradient
+                        colors={['#9E38FF', '#6E49FF', '#4B73FF']}
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        style={styles.ctaButton}
+                      >
+                        <Text style={styles.ctaText}>Edit Entry</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              ) : (
+                <>
+                  <View style={styles.emptyState} testID="gratitude-empty-state">
+                    <View style={styles.emptyIconWrap}>
+                      <View style={styles.emptyIconGlow} />
+                      <Heart color="#8F49FF" size={72} strokeWidth={1.8} />
+                    </View>
+                    <Text style={styles.emptyTitle}>Start your gratitude journey</Text>
+                  </View>
+
+                  <View style={styles.ctaWrap}>
+                    <Animated.View
+                      pointerEvents="none"
+                      style={[
+                        styles.ctaGlow,
+                        {
+                          opacity: ctaGlowOpacity,
+                          transform: [{ scale: ctaGlowScale }],
+                        },
+                      ]}
+                    />
+                    <TouchableOpacity
+                      activeOpacity={0.92}
+                      onPress={handleOpenAddEntry}
+                      style={styles.ctaTouch}
+                      testID="gratitude-cta-button"
+                    >
+                      <LinearGradient
+                        colors={['#9E38FF', '#6E49FF', '#4B73FF']}
+                        start={{ x: 0, y: 0.5 }}
+                        end={{ x: 1, y: 0.5 }}
+                        style={styles.ctaButton}
+                      >
+                        <Text style={styles.ctaText}>Add Your First Entry</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )}
             </Animated.View>
           </Animated.View>
         </ScrollView>
@@ -836,6 +900,66 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700' as const,
     textAlign: 'center',
+  },
+  entryCard: {
+    backgroundColor: 'rgba(32, 16, 72, 0.9)',
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 180, 255, 0.15)',
+    padding: 24,
+    marginBottom: 20,
+    shadowColor: '#7B38FF',
+    shadowOpacity: 0.15,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
+  },
+  entryCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  entryCardTitle: {
+    color: '#F4C95D',
+    fontSize: 18,
+    fontWeight: '700' as const,
+    flex: 1,
+  },
+  editButtonSmall: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(244, 201, 93, 0.12)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(244, 201, 93, 0.2)',
+  },
+  entryItem: {
+    color: 'rgba(247, 243, 255, 0.9)',
+    fontSize: 16,
+    lineHeight: 26,
+    fontWeight: '500' as const,
+    marginBottom: 8,
+  },
+  entryDivider: {
+    height: 1,
+    backgroundColor: 'rgba(198, 180, 255, 0.15)',
+    marginVertical: 16,
+  },
+  entryReflectionLabel: {
+    color: 'rgba(244, 201, 93, 0.7)',
+    fontSize: 12,
+    fontWeight: '700' as const,
+    textTransform: 'uppercase' as const,
+    letterSpacing: 1,
+    marginBottom: 8,
+  },
+  entryReflection: {
+    color: 'rgba(220, 214, 240, 0.82)',
+    fontSize: 15,
+    lineHeight: 24,
+    fontStyle: 'italic' as const,
   },
   ctaWrap: {
     width: '100%',

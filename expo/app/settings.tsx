@@ -611,7 +611,15 @@ export default function SettingsScreen() {
       }
       const queueKey = '@alchemize_support_queue';
       const existingRaw = await AsyncStorage.getItem(queueKey);
-      const existing = existingRaw ? (JSON.parse(existingRaw) as unknown[]) : [];
+      let existing: unknown[] = [];
+      if (existingRaw && typeof existingRaw === 'string' && existingRaw.trim().startsWith('[')) {
+        try {
+          existing = JSON.parse(existingRaw) as unknown[];
+        } catch {
+          console.warn('[Settings] Corrupted support queue, resetting');
+          existing = [];
+        }
+      }
       existing.push({
         type: supportIssueType,
         message: trimmed,

@@ -65,7 +65,7 @@ export function logSupabaseOp(
       result.error.message || result.error,
       extra ?? ''
     );
-  } else if (__DEV__) {
+  } else if (typeof __DEV__ !== 'undefined' ? __DEV__ : process.env.NODE_ENV !== 'production') {
     console.log(`[Supabase] ${operation} OK on ${tableOrBucket}`, extra ?? '');
   }
 }

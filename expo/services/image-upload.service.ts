@@ -10,6 +10,7 @@
 import { Platform } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import { manipulateAsync, SaveFormat } from 'expo-image-manipulator';
+import { decode as base64Decode } from 'base64-arraybuffer';
 import { getSupabase, getSupabaseUserId, logSupabaseOp } from '@/lib/supabase';
 
 const MAX_DIMENSION = 1600;
@@ -143,22 +144,16 @@ export async function uploadImageToSupabase(
 
     console.log('[ImageUpload] Uploading to:', storagePath);
 
-    // Read the compressed file as base64
+    // Read the compressed file as base64 and decode to ArrayBuffer
     const base64 = await FileSystem.readAsStringAsync(compressedImage.uri, {
       encoding: 'base64' as const,
     });
 
-    // Convert to blob-like format for Supabase
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    const blob = new Blob([bytes], { type: compressedImage.mimeType });
+    const arrayBuffer = base64Decode(base64);
 
     const { data, error } = await supabase.storage
       .from(BUCKET)
-      .upload(storagePath, blob, {
+      .upload(storagePath, arrayBuffer, {
         contentType: compressedImage.mimeType,
         upsert: false,
       });

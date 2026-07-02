@@ -38,7 +38,6 @@ const TRANSLATIONS = {
     rememberMe: 'Remember Me',
     forgotPassword: 'Forgot Password?',
     or: 'or continue with',
-    signInWithGoogle: 'Google',
     signInWithApple: 'Apple',
     fillFields: 'Please fill in all fields',
     enterName: 'Please enter your name',
@@ -70,7 +69,6 @@ const TRANSLATIONS = {
     rememberMe: 'Recuérdame',
     forgotPassword: '¿Olvidaste tu contraseña?',
     or: 'o continuar con',
-    signInWithGoogle: 'Google',
     signInWithApple: 'Apple',
     fillFields: 'Por favor completa todos los campos',
     enterName: 'Por favor ingresa tu nombre',
@@ -95,10 +93,9 @@ const TRANSLATIONS = {
 
 export default function AuthScreen() {
   const router = useRouter();
-  const { login, signup, loginWithApple, loginWithGoogle, resetPassword } = useAuth();
+  const { login, signup, loginWithApple, resetPassword } = useAuth();
   const [appleAuthAvailable, setAppleAuthAvailable] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     if (Platform.OS !== 'web') {
@@ -214,19 +211,6 @@ export default function AuthScreen() {
           t.resetTitle,
           t.resetMessage + '\n\n' + t.resetSent
         );
-  };
-
-  const handleGoogleSignIn = async () => {
-    if (!requireTerms()) return;
-    setGoogleLoading(true);
-    setError('');
-    const result = await loginWithGoogle();
-    setGoogleLoading(false);
-    if (result.success) {
-      router.replace('/');
-    } else if (result.error) {
-      setError(result.error);
-    }
   };
 
   const showAppleNative = appleAuthAvailable && Platform.OS !== 'web';
@@ -428,22 +412,6 @@ export default function AuthScreen() {
             </View>
 
             <View style={styles.socialRow}>
-              <TouchableOpacity
-                style={styles.socialBtn}
-                onPress={handleGoogleSignIn}
-                disabled={googleLoading}
-                activeOpacity={0.8}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <>
-                    <Text style={styles.googleG}>G</Text>
-                    <Text style={styles.socialLabel}>{t.signInWithGoogle}</Text>
-                  </>
-                )}
-              </TouchableOpacity>
-
               {showAppleNative && (
                 <View style={styles.socialBtn}>
                   {appleLoading ? (
@@ -767,11 +735,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
     gap: 8,
-  },
-  googleG: {
-    fontSize: 16,
-    fontWeight: '700' as const,
-    color: '#fff',
   },
   socialLabel: {
     fontSize: 13,

@@ -293,56 +293,6 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
-  const loginWithGoogle = useCallback(async () => {
-    try {
-      console.log('[Auth] Starting Google Sign In...');
-
-      const userId = `google_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-      const googleEmail = `user_${Date.now()}@gmail.com`;
-      const googleName = 'Google User';
-
-      const usersData = await AsyncStorage.getItem(USERS_STORAGE_KEY);
-      let users: StoredUser[] = [];
-      if (usersData && typeof usersData === 'string' && usersData.trim().startsWith('[')) {
-        try {
-          users = JSON.parse(usersData) as StoredUser[];
-        } catch {
-          console.warn('[Auth] Corrupted users data, resetting');
-          users = [];
-        }
-      }
-
-      const newUser: StoredUser = {
-        id: userId,
-        email: googleEmail,
-        name: googleName,
-        password: '',
-      };
-      users.push(newUser);
-      await AsyncStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-
-      const token = `google_token_${userId}_${Date.now()}`;
-      const newAuthState: AuthState = {
-        user: {
-          id: userId,
-          email: googleEmail,
-          name: googleName,
-        },
-        token,
-      };
-
-      setAuthState(newAuthState);
-      setCurrentUserId(userId);
-      await secureStorage.setItem(AUTH_SECURE_KEY, JSON.stringify(newAuthState));
-
-      console.log('[Auth] Google Sign In successful');
-      return { success: true };
-    } catch (error: any) {
-      console.error('[Auth] Google Sign In error:', error);
-      return { success: false, error: error.message || 'Google Sign In failed' };
-    }
-  }, []);
-
   const resetPassword = useCallback(async (email: string) => {
     try {
       console.log('[Auth] Password reset requested for:', email);
@@ -394,8 +344,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     login,
     signup,
     loginWithApple,
-    loginWithGoogle,
     resetPassword,
     logout,
-  }), [authState.user, authState.token, isLoading, rememberMe, login, signup, loginWithApple, loginWithGoogle, resetPassword, logout]);
+  }), [authState.user, authState.token, isLoading, rememberMe, login, signup, loginWithApple, resetPassword, logout]);
 });

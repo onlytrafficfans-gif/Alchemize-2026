@@ -4,6 +4,7 @@ import { manifestationsRouter } from "./routes/manifestations";
 import { goalsRouter } from "./routes/goals";
 import { tasksRouter } from "./routes/tasks";
 import { gratitudeRouter } from "./routes/gratitude";
+import { statusRouter } from "./routes/status";
 
 export const appRouter = createTRPCRouter({
   example: exampleRouter,
@@ -11,6 +12,7 @@ export const appRouter = createTRPCRouter({
   goals: goalsRouter,
   tasks: tasksRouter,
   gratitude: gratitudeRouter,
+  status: statusRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -13,7 +13,8 @@
     "validate:production": "node scripts/production-preflight.js",
     "validate:final": "node scripts/final-validation.js",
     "ci:local": "npm run validate:final && npx expo-doctor && npm run lint",
-    "ci:audit": "npm audit --audit-level=moderate"
+    "ci:audit": "npm audit --audit-level=moderate",
+    "backend:dev": "tsx backend/server.ts"
   },
   "dependencies": {
     "@expo-google-fonts/akronim": "^0.4.0",
@@ -86,6 +87,7 @@
     "zustand": "^5.0.2"
   },
   "devDependencies": {
+    "tsx": "^3.12.7",
     "@babel/core": "^7.25.2",
     "@types/react": "~19.1.10",
     "eslint": "^9.31.0",

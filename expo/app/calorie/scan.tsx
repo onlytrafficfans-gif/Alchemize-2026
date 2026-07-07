@@ -31,8 +31,7 @@ import {
   Brain,
   ShieldCheck,
 } from 'lucide-react-native';
-// eslint-disable-next-line import/no-unresolved
-import { generateObject } from '@metallic-ai/toolkit-sdk';
+import { generateObject } from '@/lib/metallic-sdk';
 import { z } from 'zod';
 import { foodLogsDb, appointmentsDb } from '@/lib/db';
 import { calculateFoodTotals, getAutoMealType, getConfidenceLabel, getHealthScoreColor, parseOptionalNumber } from '@/services/calorieAnalysisService';

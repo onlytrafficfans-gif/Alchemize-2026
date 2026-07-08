@@ -8,11 +8,11 @@ import type { AppRouter } from "@/backend/trpc/router-types";
 export const trpc = createTRPCReact<AppRouter>();
 
 const getBaseUrl = () => {
-  const url = process.env.EXPO_PUBLIC_RORK_API_BASE_URL;
+  const url = process.env.EXPO_PUBLIC_METALLIC_API_BASE_URL;
 
   if (!url) {
-    console.warn('[TRPC] EXPO_PUBLIC_RORK_API_BASE_URL not set');
-    return 'https://placeholder.rork.app';
+    console.warn('[TRPC] EXPO_PUBLIC_METALLIC_API_BASE_URL not set');
+    return 'https://placeholder.metallic.app';
   }
 
   return url;

@@ -1,5 +1,5 @@
 import { invalidateFoodLogs } from '../../services/queryInvalidationService';
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useMemo } from 'react';
 import { View, StyleSheet, Text, Platform, ActivityIndicator, ScrollView, TextInput, Alert, Animated, Dimensions, KeyboardAvoidingView } from 'react-native';
 import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
@@ -18,7 +18,6 @@ import {
   Check,
   RotateCcw,
   ChevronDown,
-  Zap,
   AlertCircle,
   RefreshCw,
   Info,
@@ -32,7 +31,7 @@ import {
   Brain,
   ShieldCheck,
 } from 'lucide-react-native';
-import { generateObject } from '@rork-ai/toolkit-sdk';
+import { generateObject } from '@/lib/metallic-sdk';
 import { z } from 'zod';
 import { foodLogsDb, appointmentsDb } from '@/lib/db';
 import { calculateFoodTotals, getAutoMealType, getConfidenceLabel, getHealthScoreColor, parseOptionalNumber } from '@/services/calorieAnalysisService';

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert, Platform } from 'react-native';
-import { Text } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Alert, Platform , Text } from 'react-native';
 import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -35,7 +34,7 @@ export default function CustomerCenterScreen() {
       await syncPurchases();
       await refresh();
       Alert.alert('Success', 'Purchase data synced successfully.');
-    } catch (error) {
+    } catch {
       Alert.alert('Error', 'Failed to sync purchases. Please try again.');
     } finally {
       setBusy(null);

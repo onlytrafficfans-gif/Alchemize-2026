@@ -3,9 +3,9 @@ import { View, StyleSheet, TextInput, Text, ScrollView, Alert, ActivityIndicator
 import { TouchableOpacity } from '@/components/HapticTouchable';
 import { useRouter } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Sparkles, Zap, X, ChevronLeft } from 'lucide-react-native';
+import { Sparkles, ChevronLeft, Zap } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { generateObject } from '@rork-ai/toolkit-sdk';
+import { generateObject } from '@/lib/metallic-sdk';
 import { z } from 'zod';
 import { workoutTemplatesDb, workoutSessionsDb, normalizedMetricsDb } from '@/lib/db/fitness';
 import { estimateCalories } from '@/lib/fitness';
